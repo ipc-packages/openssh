@@ -1,0 +1,25 @@
+.{
+    .name = .openssh,
+    .version = "10.6.0",
+    .dependencies = .{
+        .upstream = .{
+            .url = "https://cdn.openbsd.org/pub/OpenBSD/OpenSSH/portable/openssh-10.6p2.tar.gz",
+            .hash = "N-V-__8AALzHmQDksKkhWHS1p9DPm3woMPPLXDhyfGkITHEm",
+        },
+        .openssl = .{
+            .url = "git+https://github.com/ipc-packages/openssl.git#527939dd7adb210a07e113bde33e446b2436e1bf",
+            .hash = "openssl-0.0.1-mKiv9HBjYAAyCbWcs4p5XlxcI-Ia5a-BKpgK4yr8Jpo2",
+        },
+        .zlib = .{
+            .url = "git+https://github.com/ipc-packages/zlib.git#0adf192947771a4e8cbd0fc03f1bc23ac143f0d8",
+            .hash = "zlib-1.4.0-ZZQ7lQoOAACs4TWuW-GJzSR94t3pJXCA9vgac15Qx35-",
+        },
+    },
+    .minimum_zig_version = "0.17.1",
+    .paths = .{
+        "openbsd-compat",
+        "build.zig",
+        "build.zig.zon",
+    },
+    .fingerprint = 0x705783e8300d25d4,
+}
