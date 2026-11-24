@@ -797,6 +797,7 @@ pub fn build(b: *std.Build) void {
         "sshd-auth",
         "sshd-session",
         "sftp-server",
+        "ssh-keygen",
     };
 
     inline for (executables) |exe_name| {
@@ -1118,4 +1119,12 @@ const @"sshd-auth_sources" = [_][]const u8{
 
     "ssh-pkcs11-client.c",
     "ssh-sk-client.c",
+};
+
+const @"ssh-keygen_sources" = [_][]const u8{
+    "ssh-keygen.c",
+    "sshsig.c",
+    "ssh-pkcs11.c",
+    "ssh-sk-client.c",
+    "cleanup.c",
 };
