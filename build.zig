@@ -6,6 +6,9 @@ pub fn build(b: *std.Build) void {
 
     const upstream = b.dependency("upstream", .{});
 
+    const sysconfdir = b.option([]const u8, "sysconfdir", "ssh config dir path") orelse "/etc/ssh";
+    const libexecdir = b.option([]const u8, "libexecdir", "libexecdir dir path") orelse "/usr/libexec";
+
     const openssl_dep = b.dependency("openssl", .{
         .target = target,
         .optimize = optimize,
@@ -714,15 +717,15 @@ pub fn build(b: *std.Build) void {
         "-D_BSD_SOURCE",
         "-D_DEFAULT_SOURCE",
         "-D_GNU_SOURCE",
-        "-DSSHDIR=\"/etc/ssh\"",
+        b.fmt("-DSSHDIR=\"{s}\"", .{sysconfdir}),
         "-D_PATH_SSH_PROGRAM=\"/usr/bin/ssh\"",
-        "-D_PATH_SSH_ASKPASS_DEFAULT=\"/usr/libexec/ssh-askpass\"",
-        "-D_PATH_SFTP_SERVER=\"/usr/libexec/sftp-server\"",
-        "-D_PATH_SSH_KEY_SIGN=\"/usr/libexec/ssh-keysign\"",
-        "-D_PATH_SSHD_SESSION=\"/usr/libexec/sshd-session\"",
-        "-D_PATH_SSHD_AUTH=\"/usr/libexec/sshd-auth\"",
-        "-D_PATH_SSH_PKCS11_HELPER=\"/usr/libexec/ssh-pkcs11-helper\"",
-        "-D_PATH_SSH_SK_HELPER=\"/usr/libexec/ssh-sk-helper\"",
+        b.fmt("-D_PATH_SSH_ASKPASS_DEFAULT=\"{s}/ssh-askpass\"", .{libexecdir}),
+        b.fmt("-D_PATH_SFTP_SERVER=\"{s}/sftp-server\"", .{libexecdir}),
+        b.fmt("-D_PATH_SSH_KEY_SIGN=\"{s}/ssh-keysign\"", .{libexecdir}),
+        b.fmt("-D_PATH_SSHD_SESSION=\"{s}/sshd-session\"", .{libexecdir}),
+        b.fmt("-D_PATH_SSHD_AUTH=\"{s}/sshd-auth\"", .{libexecdir}),
+        b.fmt("-D_PATH_SSH_PKCS11_HELPER=\"{s}/ssh-pkcs11-helper\"", .{libexecdir}),
+        b.fmt("-D_PATH_SSH_SK_HELPER=\"{s}/ssh-sk-helper\"", .{libexecdir}),
         "-D_PATH_SSH_PIDDIR=\"/var/run\"",
         "-D_PATH_PRIVSEP_CHROOT_DIR=\"/var/empty\"",
         "-DHAVE_CONFIG_H",
