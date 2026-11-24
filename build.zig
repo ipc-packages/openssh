@@ -8,6 +8,25 @@ pub fn build(b: *std.Build) void {
 
     const sysconfdir = b.option([]const u8, "sysconfdir", "ssh config dir path") orelse "/etc/ssh";
     const libexecdir = b.option([]const u8, "libexecdir", "libexecdir dir path") orelse "/usr/libexec";
+    const sandbox = b.option(enum {
+        seccomp,
+        rlimit,
+        null,
+    }, "sandbox", "privilege separation sandbox") orelse .seccomp;
+
+    const secomp_audit_arch: ?SecompAuditArch = if (sandbox == .seccomp) switch (target.result.cpu.arch) {
+        .x86_64 => .AUDIT_ARCH_X86_64,
+        .x86 => .AUDIT_ARCH_I386,
+        .arm, .armeb, .thumb, .thumbeb => .AUDIT_ARCH_ARM,
+        .aarch64, .aarch64_be => .AUDIT_ARCH_AARCH64,
+        .riscv64 => .AUDIT_ARCH_RISCV64,
+        .mips, .mipsel => .AUDIT_ARCH_MIPS,
+        .powerpc => .AUDIT_ARCH_PPC,
+        .powerpc64 => .AUDIT_ARCH_PPC64,
+        .powerpc64le => .AUDIT_ARCH_PPC64LE,
+        .s390x => .AUDIT_ARCH_S390X,
+        else => .AUDIT_ARCH_AARCH64,
+    } else null;
 
     const openssl_dep = b.dependency("openssl", .{
         .target = target,
@@ -636,13 +655,13 @@ pub fn build(b: *std.Build) void {
         .PTY_ZEROREAD = null,
         .SANDBOX_CAPSICUM = null,
         .SANDBOX_DARWIN = null,
-        .SANDBOX_NULL = null,
-        .SANDBOX_RLIMIT = null,
-        .SANDBOX_SECCOMP_FILTER = 1,
+        .SANDBOX_NULL = if (sandbox == .null) true else null,
+        .SANDBOX_RLIMIT = if (sandbox == .rlimit) true else null,
+        .SANDBOX_SECCOMP_FILTER = if (sandbox == .seccomp) true else null,
         .SANDBOX_SKIP_RLIMIT_FSIZE = null,
         .SANDBOX_SKIP_RLIMIT_NOFILE = null,
         .SANDBOX_SOLARIS = null,
-        .SECCOMP_AUDIT_ARCH = .AUDIT_ARCH_AARCH64,
+        .SECCOMP_AUDIT_ARCH = secomp_audit_arch,
         .SETEUID_BREAKS_SETUID = null,
         .SIZEOF_INT = 4,
         .SIZEOF_LONG_INT = 8,
@@ -804,6 +823,19 @@ pub fn build(b: *std.Build) void {
         b.installArtifact(exe);
     }
 }
+
+const SecompAuditArch = enum {
+    AUDIT_ARCH_X86_64,
+    AUDIT_ARCH_I386,
+    AUDIT_ARCH_ARM,
+    AUDIT_ARCH_AARCH64,
+    AUDIT_ARCH_RISCV64,
+    AUDIT_ARCH_MIPS,
+    AUDIT_ARCH_PPC,
+    AUDIT_ARCH_PPC64,
+    AUDIT_ARCH_PPC64LE,
+    AUDIT_ARCH_S390X,
+};
 
 const libopenbsd_compat_sources = [_][]const u8{
     "arc4random.c",
